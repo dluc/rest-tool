@@ -1,2 +1,3 @@
 A handy JS-based REST troubleshooting tool to test GET/PUT/POST/DELETE etc
 
+N.B. due to security restrictions it can be used only to test locally - limitation can be solved with a proxy or JSONP
