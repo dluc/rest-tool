@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!--
+
+REST Tool
+
+Devis Lucato
+www.lucato.it
+
+-->
+<html>
+<head>
+	<title>REST Tool</title>
+	<script src="http://code.jquery.com/jquery-1.5.js"></script>
+	<script>
+		var thisApp = new function()
+		{
+			this.statusCodeDescription = '';
+
+			this.registerEvents = function()
+			{
+				$('#submit').click(function(){
+					thisApp.resetTool();
+					thisApp.runRequest(
+						$('#protocol').val(),
+						$('#url').val(),
+						$('#method').val(),
+						$('#accept').val(),
+						$('#data').val());
+					return false;
+				});
+			}
+
+			this.resetTool = function()
+			{
+				thisApp.setStatus('');
+				$('#status').html('');
+				$('#headers').html('');
+				$('#response').html('');
+			}
+
+			this.setStatus = function(status)
+			{
+				thisApp.statusCodeDescription = status;
+			}
+
+			this.runRequest = function(p_protocol, p_url, p_method, p_accept, p_data)
+			{
+				jQuery.ajax({
+					url:          p_protocol + '://' + p_url,
+					type:         p_method,
+					accepts:      p_accept,
+					data:         p_data,
+					timeout:      5000,
+					crossDomain:  true,
+					async:        true,
+					cache:        false,
+					contentType:  'application/x-www-form-urlencoded',
+//					success:      function(data, textStatus, jqXHR) { thisApp.successCallback(data, textStatus, jqXHR); },
+//					error:        function(jqXHR, textStatus, errorThrown) { thisApp.failureCallback(jqXHR, textStatus, errorThrown); },
+					complete:     function(jqXHR, textStatus) { thisApp.completeCallback(jqXHR, textStatus); },
+					statusCode:   {
+						100: function() { thisApp.setStatus('Continue'); },
+						101: function() { thisApp.setStatus('Switching Protocols'); },
+						200: function() { thisApp.setStatus('OK'); },
+						201: function() { thisApp.setStatus('Created'); },
+						202: function() { thisApp.setStatus('Accepted'); },
+						203: function() { thisApp.setStatus('Non-Authoritative Information'); },
+						204: function() { thisApp.setStatus('No Content'); },
+						205: function() { thisApp.setStatus('Reset Content'); },
+						206: function() { thisApp.setStatus('Partial Content'); },
+						300: function() { thisApp.setStatus('Multiple Choices'); },
+						301: function() { thisApp.setStatus('Moved Permanently'); },
+						302: function() { thisApp.setStatus('Found'); },
+						303: function() { thisApp.setStatus('See Other'); },
+						304: function() { thisApp.setStatus('Not Modified'); },
+						305: function() { thisApp.setStatus('Use Proxy'); },
+						307: function() { thisApp.setStatus('Temporary Redirect'); },
+						400: function() { thisApp.setStatus('Bad Request'); },
+						401: function() { thisApp.setStatus('Unauthorized'); },
+						402: function() { thisApp.setStatus('Payment Required'); },
+						403: function() { thisApp.setStatus('Forbidden'); },
+						404: function() { thisApp.setStatus('Not Found'); },
+						405: function() { thisApp.setStatus('Method Not Allowed'); },
+						406: function() { thisApp.setStatus('Not Acceptable'); },
+						407: function() { thisApp.setStatus('Proxy Authentication Required'); },
+						408: function() { thisApp.setStatus('Request Timeout'); },
+						409: function() { thisApp.setStatus('Conflict'); },
+						410: function() { thisApp.setStatus('Gone'); },
+						411: function() { thisApp.setStatus('Length Required'); },
+						412: function() { thisApp.setStatus('Precondition Failed'); },
+						413: function() { thisApp.setStatus('Request Entity Too Large'); },
+						414: function() { thisApp.setStatus('Request-URI Too Long'); },
+						415: function() { thisApp.setStatus('Unsupported Media Type'); },
+						416: function() { thisApp.setStatus('Requested Range Not Satisfiable'); },
+						417: function() { thisApp.setStatus('Expectation Failed'); },
+						500: function() { thisApp.setStatus('Internal Server Error'); },
+						501: function() { thisApp.setStatus('Not Implemented'); },
+						502: function() { thisApp.setStatus('Bad Gateway'); },
+						503: function() { thisApp.setStatus('Service Unavailable'); },
+						504: function() { thisApp.setStatus('Gateway Timeout'); },
+						505: function() { thisApp.setStatus('HTTP Version Not Supported'); }
+					}
+				});
+			}
+
+//			this.successCallback = function(data, textStatus, jqXHR)
+//			{
+//			}
+//
+//			this.failureCallback = function(jqXHR, textStatus, errorThrown)
+//			{
+//			}
+
+			this.completeCallback = function(jqXHR, textStatus)
+			{
+				$('#status').html(jqXHR.status + ' ' + this.statusCodeDescription);
+				$('#headers').html(jqXHR.getAllResponseHeaders().replace(/\n/g,'<br/>'));
+				$('#response').html(jqXHR.responseText);
+			}
+		}
+
+		$(document).ready(function(){
+			thisApp.registerEvents();
+		});
+	</script>
+
+	<style>
+		h1 {
+			font-size:1em;
+			font-family:verdana, helvetica;
+		}
+		form {
+			margin:0;
+		}
+		table.request {
+			width:100%;
+			border:0;
+		}
+		.hcol {
+			width:100px;
+			font-family:verdana, helvetica;
+			font-size:0.8em;
+			padding:8px;
+		}
+		.request .hcol {
+			background-color:#5F9BE3;
+			color:white;
+		}
+		.response .hcol {
+			background-color:#73A81E;
+			color:white;
+		}
+		#submit {
+			float:right;
+			width:100px;
+			color:white;
+			background-color:#5f9be3;
+		}
+		#url, #data {
+			width:100%;
+		}
+		#status, #headers, #response {
+			width:100%;
+			border:1px solid black;
+			overflow:hidden;
+		}
+		#status {
+			height:30px;
+			line-height:30px;;
+			font-family:"courier new";
+			font-size:0.8em;
+			padding-left:5px;
+		}
+		#headers {
+			height:100px;
+			overflow:auto;
+			font-family:"courier new";
+			font-size:0.8em;
+			padding:5px 0 0 5px;
+		}
+		#response {
+			height:200px;
+			overflow:auto;
+		}
+		#copyright {
+			font-family:verdana, helvetica;
+			font-size:0.6em;
+			margin:40px auto;
+			border-top:1px solid #ccc;
+			color:#ccc;
+		}
+	</style>
+</head>
+<body>
+<form>
+
+	<h1>Request</h1>
+
+	<table class="request">
+		<tr>
+			<td class="hcol">Method</td>
+			<td>
+				<select name="method" id="method">
+					<option value="POST">POST (Insert/Create)</option>
+					<option value="GET">GET (Select/Read)</option>
+					<option value="PUT">PUT (Update/Replace)</option>
+					<option value="DELETE">DELETE</option>
+					<option value="HEAD">HEAD</option>
+					<option value="OPTIONS">OPTIONS</option>
+					<option value="TRACE">TRACE</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="hcol">Protocol</td>
+			<td>
+				<select name="protocol" id="protocol">
+					<option value="HTTP">HTTP</option>
+					<option value="HTTPS">HTTPS</option>
+				</select>
+
+				<input type="button" id="submit" value="Run">
+			</td>
+		</tr>
+		<tr>
+			<td class="hcol">Url</td>
+			<td>
+				<input type="text" name="url" id="url">
+			</td>
+		</tr>
+		<tr>
+			<td class="hcol">Data</td>
+			<td>
+				<input type="text" name="data" id="data">
+			</td>
+		</tr>
+		<tr>
+			<td class="hcol">Accept</td>
+			<td>
+				<select name="accept" id="accept">
+					<option value="text/html,application/xhtml+xml,application/xml">text/html,application/xhtml+xml,application/xml</option>
+					<option value="application/xml">application/xml</option>
+					<option value="application/json">application/json</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+
+	<h1>Response</h1>
+
+	<table border="0" width="100%" class="response">
+		<tr>
+			<td class="hcol">Status code</td>
+			<td>
+				<div id="status">&nbsp;</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="hcol">Headers</td>
+			<td>
+				<div id="headers">&nbsp;</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="hcol">Content</td>
+			<td>
+				<div id="response">&nbsp;</div>
+			</td>
+		</tr>
+	</table>
+
+</form>
+
+<div id="copyright">
+	REST Tool - Devis Lucato
+</div>
+
+</body>
+</html>
